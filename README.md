@@ -9,8 +9,8 @@
 </p>
 
 <p align="center">
-  A role-based Finance Dashboard backend system — built with Spring Boot, JWT Security, and MySQL.
-  Supports financial record management, dashboard analytics, summary reports (with PDF export), and full access control.
+  A role-based Finance Dashboard backend built with Spring Boot, JWT Security, and MySQL.
+  Supports financial record management, dashboard analytics, summary reports with PDF export, and full access control.
 </p>
 
 ---
@@ -20,60 +20,6 @@
 <p align="center">
   <img src="https://res.cloudinary.com/ddtcj9ks5/image/upload/v1775319001/Financial-Service-Use_Case_Diagram_w9drpj.png" alt="Use Case Diagram" width="420"/>
 </p>
-
----
-
-## 📁 Project Structure
-
-```
-com.Financial.service
-│
-├── config/
-│   ├── JwtService.java              → Token generate & validate karna
-│   ├── JwtFilter.java               → Har request pe token check
-│   ├── SecurityConfig.java          → Role-based access control
-│   ├── AsyncConfig.java             → @Async enable karna (PDF generation)
-│   └── PasswordConfig.java          → BCrypt encoder
-│
-├── controller/
-│   ├── AuthController.java          → /api/auth/** (login, register)
-│   ├── AdminController.java         → /api/admin/** (users, records)
-│   ├── AnalystController.java       → /api/analyst/** (view + filter)
-│   ├── UserController.java          → /api/users/** (own records)
-│   ├── DashboardController.java     → /api/v1/dashboard
-│   └── ReportController.java        → /api/v1/admin/reports
-│
-├── service/
-│   ├── AuthService.java
-│   ├── FinancialRecordService.java
-│   ├── DashboardService.java
-│   └── ReportService.java
-│
-├── dto/
-│   ├── FinancialFilterRequest.java  → Common filter DTO (dashboard + report)
-│   ├── FinancialRecordRequest.java
-│   ├── FinancialRecordResponse.java
-│   ├── DashboardResponse.java
-│   └── report/
-│       └── ReportResponse.java
-│
-├── entity/
-│   ├── Users.java
-│   └── FinancialRecord.java
-│
-├── util/
-│   └── PdfReportUtil.java           → Async PDF generator (OpenPDF)
-│
-├── exception/
-│   ├── GlobalExceptionHandler.java
-│   ├── UserNotFoundException.java
-│   ├── UserAlreadyExistsException.java
-│   └── InvalidCredentialsException.java
-│
-└── repository/
-    ├── UserRepository.java
-    └── FinancialRecordRepository.java
-```
 
 ---
 
@@ -89,97 +35,52 @@ com.Financial.service
 | MySQL | 8.0.43 | Database |
 | BCrypt | — | Password hashing |
 | OpenPDF | 1.3.30 | PDF report generation |
-| Lombok | Latest | Boilerplate reduce |
-| Bean Validation | Latest | `@Valid` annotations |
+| Lombok | Latest | Boilerplate reduction |
+| Bean Validation | Latest | Input validation |
 
 ---
 
 ## ⚙️ Setup & Run
 
-### 1. Prerequisites
+**Prerequisites:** Java 21+, Maven 3.8+, MySQL 8.0+
 
-- Java 21+
-- Maven 3.8+
-- MySQL 8.0+
-
-### 2. Database setup
-
+**Step 1 — Create database**
 ```sql
 CREATE DATABASE financial_service;
 ```
 
-### 3. application.properties configure karo
-
+**Step 2 — Configure `application.properties`**
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/financial_service
 spring.datasource.username=your_username
 spring.datasource.password=your_password
-
 spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-
 jwt.secret=your_secret_key_here
 jwt.expiration=3600000
 ```
 
-### 4. Run karo
-
+**Step 3 — Run**
 ```bash
 mvn clean install
 mvn spring-boot:run
 ```
 
-Server start hoga: `http://localhost:8081`
+Server runs at: `http://localhost:8081`
 
 ---
 
-## 🔐 Authentication Flow
+## 🔐 Authentication
 
-### Register — `POST /api/auth/register`
-
-```json
-// Request
-{
-  "name": "Rahul Sharma",
-  "email": "rahul@example.com",
-  "password": "rahul@123"
-}
-
-// Response — 201 Created
-{
-  "success": true,
-  "message": "User registered successfully",
-  "data": { "id": "uuid", "name": "Rahul Sharma", "email": "rahul@example.com", "role": "VIEWER" }
-}
-```
-
-### Login — `POST /api/auth/login`
-
-```json
-// Request
-{
-  "email": "rahul@example.com",
-  "password": "rahul@123"
-}
-
-// Response — 200 OK
-{
-  "success": true,
-  "message": "Login successful",
-  "data": {
-    "token": "eyJhbGci...",
-    "tokenType": "Bearer",
-    "user": { "id": "uuid", "name": "Rahul Sharma", "role": "ADMIN" }
-  }
-}
-```
-
-> Aage sabhi requests mein Header mein bhejo:
-> `Authorization: Bearer eyJhbGci...`
+- **Register** — Creates a new user account. Default role assigned is `VIEWER`.
+- **Login** — Returns a JWT token valid for 1 hour.
+- All secured endpoints require the token in the request header:
+  `Authorization: Bearer <token>`
 
 ---
 
-## 👤 Role Permissions
+## 👤 Role & Access Control
+
+There are three roles in the system. Each role has different access levels.
 
 | Endpoint | ADMIN | ANALYST | VIEWER |
 |---|:---:|:---:|:---:|
@@ -188,230 +89,64 @@ Server start hoga: `http://localhost:8081`
 | `/api/analyst/**` | ❌ | ✅ | ❌ |
 | `/api/admin/**` | ✅ | ❌ | ❌ |
 
----
-
-## 💳 Financial Records API
-
-| Method | Endpoint | Role | Description |
-|---|---|---|---|
-| `POST` | `/api/v1/records` | ADMIN | Record create karo |
-| `GET` | `/api/v1/records/{id}` | ALL | Single record by ID |
-| `GET` | `/api/v1/records/filter` | ALL | Filtered records |
-| `GET` | `/api/v1/records/recent` | ALL | Recent activity |
-| `PUT` | `/api/v1/records/{id}` | ADMIN | Record update karo |
-| `DELETE` | `/api/v1/records/{id}` | ADMIN | Soft delete |
-
-### Filter Parameters (sabhi optional)
-
-| Param | Type | Example | Description |
-|---|---|---|---|
-| `userId` | String | `u1` | Specific user, null = all |
-| `type` | String | `INCOME` / `EXPENSE` | Transaction type |
-| `category` | String | `FOOD` / `SALARY` | Category filter |
-| `from` | String | `2024-01-01T00:00:00` | Date range start |
-| `to` | String | `2024-03-31T23:59:59` | Date range end |
-| `minAmount` | String | `100` | Minimum amount |
-| `maxAmount` | String | `5000` | Maximum amount |
-| `days` | Integer | `7` / `30` / `90` | Last N days |
-
-```
-# Example calls
-GET /api/v1/records/filter?userId=u1&type=INCOME&days=30
-GET /api/v1/records/recent?userId=u1&days=7
-GET /api/v1/records/filter?category=FOOD&minAmount=500&maxAmount=5000
-```
+- **VIEWER** — Can only view their own records and dashboard.
+- **ANALYST** — Can view all records, filter them, and access insights.
+- **ADMIN** — Full access: create, update, delete records, manage users, and generate reports.
 
 ---
 
-## 📊 Dashboard API
+## 💳 Financial Records
 
-> Sabke liye — All params optional
+Each financial record contains: amount, type (`INCOME` or `EXPENSE`), category, date, and notes.
 
-```
-GET /api/v1/dashboard
-```
+- `INCOME` means money was received by the user.
+- `EXPENSE` means money was spent by the user.
 
-| Param | Description |
+Records support filtering by type, category, date range, amount range, and user. Soft delete is used — records are never permanently removed from the database.
+
+---
+
+## 📊 Dashboard
+
+Returns a summary for one user or all users. Includes total income, total expenses, net balance, category-wise breakdown, monthly and weekly trends, and the 10 most recent transactions.
+
+All filters are optional: date range, last N days, type, category, and amount range.
+
+---
+
+## 📋 Admin Report
+
+Available only to ADMIN. Returns the same data as the dashboard, plus a per-user breakdown and the full list of filtered records.
+
+A **PDF version** of the report can also be downloaded. The PDF is generated asynchronously in a background thread and includes all summary sections and the complete records table.
+
+---
+
+## ❌ Error Handling
+
+| Situation | HTTP Status |
 |---|---|
-| `userId` | Specific user (null = all users) |
-| `days` | Last N days (7 / 15 / 30 / 90) |
-| `from` / `to` | Custom date range (overrides days) |
-| `type` | `INCOME` / `EXPENSE` |
-| `category` | Category filter |
-| `minAmount` / `maxAmount` | Amount range |
-
-### Dashboard Response
-
-```json
-{
-  "totalIncome": 150000,
-  "totalExpense": 45000,
-  "netBalance": 105000,
-
-  "categoryWiseTotals": {
-    "SALARY": 150000,
-    "FOOD": -15000,
-    "RENT": -30000
-  },
-
-  "typeAndCategoryWiseTotals": {
-    "INCOME": { "SALARY": 150000 },
-    "EXPENSE": { "FOOD": 15000, "RENT": 30000 }
-  },
-
-  "monthlyTrends": { "2024-01": 40000, "2024-02": 35000 },
-  "weeklyTrends":  { "2024-W01": 10000, "2024-W02": -5000 },
-
-  "recentActivities": [ "...last 10 records..." ],
-
-  "totalRecords": 120,
-  "appliedDateRange": "Last 30 days"
-}
-```
+| Invalid input | `400 Bad Request` |
+| Email already registered | `409 Conflict` |
+| User not found | `404 Not Found` |
+| Wrong email or password | `401 Unauthorized` |
+| Token expired or invalid | `401 Unauthorized` |
+| Insufficient role / permission | `403 Forbidden` |
+| Unexpected server error | `500 Internal Server Error` |
 
 ---
 
-## 📋 Admin Report API
+## ✅ Assumptions
 
-> Sirf ADMIN ke liye
-
-```
-GET /api/v1/admin/reports         → JSON report
-GET /api/v1/admin/reports/download → PDF download
-```
-
-### Report Response — extra fields (Dashboard se zyada)
-
-```json
-{
-  "reportGeneratedAt": "2024-04-01T10:30:00",
-  "appliedUserId": "ALL",
-  "appliedType": "ALL",
-  "appliedCategory": "ALL",
-
-  "typeWiseTotals": { "INCOME": 150000, "EXPENSE": 45000 },
-
-  "perUserSummary": {
-    "u1": {
-      "userId": "u1", "userName": "Rahul",
-      "totalIncome": 80000, "totalExpense": 20000, "netBalance": 60000,
-      "categoryWiseTotals": { "SALARY": 80000, "FOOD": -10000 }
-    }
-  },
-
-  "records": [ "...sabhi filtered records..." ]
-}
-```
-
-### PDF Download
-
-```
-GET /api/v1/admin/reports/download?days=30&type=EXPENSE
-```
-
-PDF mein include hoga:
-- Title header with generation timestamp
-- Applied filters info
-- Overall summary (Income / Expense / Net Balance)
-- Category wise totals
-- Type & Category breakdown
-- Monthly trends
-- Per user summary
-- All records table
-
----
-
-## ❌ Exception Handling
-
-| Exception | HTTP Status | Message |
-|---|---|---|
-| `@Valid` fail | `400 Bad Request` | Field-wise validation errors |
-| `UserAlreadyExistsException` | `409 Conflict` | Email already registered |
-| `UserNotFoundException` | `404 Not Found` | User not found |
-| `InvalidCredentialsException` | `401 Unauthorized` | Invalid email or password |
-| Token expired | `401 Unauthorized` | Token has expired |
-| Token invalid | `401 Unauthorized` | Token signature is invalid |
-| Role mismatch | `403 Forbidden` | You don't have permission |
-| Unexpected error | `500 Internal Server Error` | Something went wrong |
-
----
-
-## 📦 Uniform API Response Format
-
-Sabhi responses isi format mein aate hain:
-
-```json
-{
-  "success": true,
-  "message": "Human readable message",
-  "data": { "..." },
-  "timestamp": "2026-04-03T00:45:00"
-}
-```
-
----
-
-## 🗄️ Database Schema
-
-### `users` table
-
-| Column | Type | Description |
-|---|---|---|
-| `id` | VARCHAR (UUID) | Primary key |
-| `name` | VARCHAR | User ka naam |
-| `email` | VARCHAR (unique) | Login email |
-| `password` | VARCHAR | BCrypt hash |
-| `role` | ENUM | `ADMIN` / `ANALYST` / `VIEWER` |
-| `active` | BOOLEAN | Account active hai ya nahi |
-| `created_at` | DATETIME | Auto set on insert |
-| `updated_at` | DATETIME | Auto set on update |
-| `last_login` | DATETIME | Last login time |
-
-### `financial_records` table
-
-| Column | Type | Description |
-|---|---|---|
-| `id` | VARCHAR (UUID) | Primary key |
-| `amount` | DECIMAL(15,2) | Transaction amount |
-| `type` | ENUM | `INCOME` / `EXPENSE` |
-| `category` | ENUM | `SALARY`, `FOOD`, `RENT`, etc. |
-| `date` | DATETIME | Transaction date |
-| `notes` | VARCHAR(500) | Optional description |
-| `active` | BOOLEAN | Soft delete flag |
-| `user_id` | VARCHAR (FK) | Reference to users table |
-| `created_at` | DATETIME | Auto set |
-| `updated_at` | DATETIME | Auto set |
-
----
-
-## 🔑 JWT Token Structure
-
-```
-Header.Payload.Signature
-
-Payload:
-{
-  "sub":  "user@example.com",   ← email
-  "role": "ADMIN",              ← role
-  "iat":  1700000000,           ← issued at
-  "exp":  1700003600            ← expires in 1 hour
-}
-```
-
----
-
-## ✅ Assumptions Made
-
-- Default role on register is `VIEWER`
-- Soft delete — records `active = false` ho jaate hain, delete nahi hote
-- `INCOME` ka matlab paisa add hua, `EXPENSE` ka matlab paisa cut hua
-- Date format: `yyyy-MM-ddTHH:mm:ss` (ISO LocalDateTime)
-- `from/to` custom range, `days` se priority zyada hai
-- PDF generation async hoti hai — background thread mein chalti hai
-- `netBalance = totalIncome - totalExpense`
+- New users get the `VIEWER` role by default.
+- Soft delete is used — deleted records have `active = false`.
+- Date format used throughout: `yyyy-MM-ddTHH:mm:ss`
+- If both `days` and `from/to` are provided, `from/to` takes priority.
+- Net balance is always calculated as `totalIncome - totalExpense`.
+- PDF generation runs asynchronously so it does not block the main thread.
 
 ---
 
 ## 📄 License
 
-This project is for assessment purposes.
+This project is built for assessment purposes.
