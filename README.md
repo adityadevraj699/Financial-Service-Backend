@@ -129,7 +129,7 @@ mvn clean install
 mvn spring-boot:run
 ```
 
-Server start hoga: `http://localhost:8080`
+Server start hoga: `http://localhost:8081`
 
 ---
 
@@ -184,8 +184,8 @@ Server start hoga: `http://localhost:8080`
 | Endpoint | ADMIN | ANALYST | VIEWER |
 |---|:---:|:---:|:---:|
 | `/api/auth/**` | ✅ | ✅ | ✅ |
-| `/api/users/**` | ✅ | ✅ | ✅ |
-| `/api/analyst/**` | ✅ | ✅ | ❌ |
+| `/api/users/**` | ❌ | ❌ | ✅ |
+| `/api/analyst/**` | ❌ | ✅ | ❌ |
 | `/api/admin/**` | ✅ | ❌ | ❌ |
 
 ---
