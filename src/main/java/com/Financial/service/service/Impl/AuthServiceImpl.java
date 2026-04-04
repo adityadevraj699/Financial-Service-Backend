@@ -25,12 +25,6 @@ public class AuthServiceImpl implements AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
 
-	@Override
-	public Users createUser(UserDto userDto) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public AuthResponse login(String email, String password) {
         
         Users user = userRepository.findByEmail(email)
@@ -59,34 +53,5 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-	@Override
-	public Users updateUser(String id, UserDto userDto) {
-		
-		return null;
-	}
-
-	@Override
-	public void deleteUser(String id) {
-		
-		
-	}
-
-	@Override
-	public List<UserDto> getAllUsers() {
-		
-		return null;
-	}
-
-	@Override
-	public UserDto getUserById(String id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<UserDto> getUsersByRole(String role) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 }
