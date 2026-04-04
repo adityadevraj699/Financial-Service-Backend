@@ -42,10 +42,8 @@ public class PdfReportUtil {
     public CompletableFuture<byte[]> generatePdfAsync(ReportResponse report) {
         try {
             byte[] pdfBytes = buildPdf(report);
-            log.info("PDF generated successfully — {} records", report.getTotalRecords());
             return CompletableFuture.completedFuture(pdfBytes);
         } catch (Exception e) {
-            log.error("PDF generation failed: {}", e.getMessage());
             return CompletableFuture.failedFuture(e);
         }
     }
