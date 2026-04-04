@@ -26,6 +26,7 @@ import com.Financial.service.dto.FinancialRecordResponse;
 import com.Financial.service.dto.ReportResponse;
 import com.Financial.service.dto.UpdateStatusRequest;
 import com.Financial.service.dto.UserDto;
+import com.Financial.service.entity.UsersRole;
 import com.Financial.service.repository.UserRepository;
 import com.Financial.service.service.AdminService;
 import com.Financial.service.service.FinancialService;
@@ -70,20 +71,14 @@ public class AdminController {
 	            .status(HttpStatus.OK)
 	            .body(ApiResponse.success("User role updated successfully", updatedUser));
 	}
-	
-	//get all Analysis
-	@GetMapping("/analysts")
-	public ResponseEntity<ApiResponse<List<UserDto>>> getAllAnalysts() {
-	    List<UserDto> analysts = adminService.getAllAnalysts();
-	    return ResponseEntity
-	            .status(HttpStatus.OK)
-	            .body(ApiResponse.success("Analysts retrieved successfully", analysts));
-	}
+
 	
 	// get All Users
 	@GetMapping("/users")
-	public ResponseEntity<ApiResponse<List<UserDto>>> getAllUsers() {
-	    List<UserDto> users = adminService.getAllUsers();
+	public ResponseEntity<ApiResponse<List<UserDto>>> getAllUsers(
+	        @RequestParam(required = false) UsersRole role) {
+
+	    List<UserDto> users = adminService.getAllUsers(role);
 	    return ResponseEntity
 	            .status(HttpStatus.OK)
 	            .body(ApiResponse.success("Users retrieved successfully", users));
@@ -174,7 +169,7 @@ public class AdminController {
 	
    
     @GetMapping("/reports/download")
-    public ResponseEntity<byte[]> downloadPdfReport(
+    public ResponseEntity<?> downloadPdfReport(
             @Valid @ModelAttribute FinancialFilterRequest filter) {
 
         try {
@@ -195,7 +190,9 @@ public class AdminController {
                     .body(pdfBytes);
 
         } catch (Exception e) {
-            throw new RuntimeException("PDF generation failed: " + e.getMessage());
+        	return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("PDF generation failed: " + e.getMessage())); 
         }
     }
 

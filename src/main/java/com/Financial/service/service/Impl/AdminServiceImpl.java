@@ -72,13 +72,6 @@ public class AdminServiceImpl implements AdminService {
 	}
 
 
-	@Override
-	public List<UserDto> getAllAnalysts() {
-		return userRepository.findByRoleAndActiveTrue(UsersRole.ANALYST).stream()
-				.map(UserDto::users)
-				.toList();
-	}
-
 
 	@Transactional
 	@Override
@@ -106,12 +99,19 @@ public class AdminServiceImpl implements AdminService {
 
 
 	@Override
-	public List<UserDto> getAllUsers() {
-		
-		return userRepository.findByActiveTrue().stream()
-				.filter(user -> user.getRole() != UsersRole.ADMIN)
-				.map(UserDto::users)
-				.toList();
+	public List<UserDto> getAllUsers(UsersRole role) {
+
+	    if (role == null) {
+	        return userRepository.findByActiveTrue().stream()
+	                .filter(user -> user.getRole() != UsersRole.ADMIN)
+	                .map(UserDto::users)
+	                .toList();
+	    }
+
+	    return userRepository.findByRoleAndActiveTrue(role).stream()
+	            .filter(user -> user.getRole() != UsersRole.ADMIN)
+	            .map(UserDto::users)
+	            .toList();
 	}
 
 }
