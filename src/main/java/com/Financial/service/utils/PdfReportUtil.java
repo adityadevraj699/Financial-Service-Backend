@@ -58,39 +58,36 @@ public class PdfReportUtil {
         PdfWriter.getInstance(document, baos);
         document.open();
 
-        // ── 1. Title Page Header ──────────────────
+       
         addTitleHeader(document, report);
 
-        // ── 2. Applied Filters Info ───────────────
         addFiltersSection(document, report);
 
-        // ── 3. Overall Summary ────────────────────
+       
         addOverallSummary(document, report);
 
-        // ── 4. Category Wise Totals ───────────────
+        
         addCategoryWiseTotals(document, report);
 
-        // ── 5. Type + Category Breakdown ─────────
+        
         addTypeAndCategoryBreakdown(document, report);
 
-        // ── 6. Monthly Trends ─────────────────────
+        
         addMonthlyTrends(document, report);
 
-        // ── 7. Per User Summary ───────────────────
+       
         if (report.getPerUserSummary() != null && !report.getPerUserSummary().isEmpty()) {
             addPerUserSummary(document, report);
         }
 
-        // ── 8. All Records Table ──────────────────
+        
         addRecordsTable(document, report);
 
         document.close();
         return baos.toByteArray();
     }
 
-    // ──────────────────────────────────────────────
-    // Section 1: Title Header
-    // ──────────────────────────────────────────────
+    
     private void addTitleHeader(Document doc, ReportResponse report) throws Exception {
 
         PdfPTable headerTable = new PdfPTable(1);
@@ -115,9 +112,7 @@ public class PdfReportUtil {
         doc.add(Chunk.NEWLINE);
     }
 
-    // ──────────────────────────────────────────────
-    // Section 2: Applied Filters
-    // ──────────────────────────────────────────────
+    
     private void addFiltersSection(Document doc, ReportResponse report) throws Exception {
 
         doc.add(createSectionHeader("Applied Filters"));
@@ -135,9 +130,7 @@ public class PdfReportUtil {
         doc.add(Chunk.NEWLINE);
     }
 
-    // ──────────────────────────────────────────────
-    // Section 3: Overall Summary
-    // ──────────────────────────────────────────────
+   
     private void addOverallSummary(Document doc, ReportResponse report) throws Exception {
 
         doc.add(createSectionHeader("Overall Summary"));
@@ -145,11 +138,11 @@ public class PdfReportUtil {
         PdfPTable table = new PdfPTable(new float[]{3, 2, 2, 2, 2});
         table.setWidthPercentage(100);
 
-        // Header row
+       
         addTableHeader(table, "Total Records", "Total Income", "Total Expense",
                 "Net Balance", "Status");
 
-        // Data row
+        
         BigDecimal net = report.getNetBalance();
         String status = net.compareTo(BigDecimal.ZERO) >= 0 ? "PROFIT" : "LOSS";
         Font statusFont = net.compareTo(BigDecimal.ZERO) >= 0 ? INCOME_FONT : EXPENSE_FONT;
@@ -164,9 +157,7 @@ public class PdfReportUtil {
         doc.add(Chunk.NEWLINE);
     }
 
-    // ──────────────────────────────────────────────
-    // Section 4: Category Wise Totals
-    // ──────────────────────────────────────────────
+    
     private void addCategoryWiseTotals(Document doc, ReportResponse report) throws Exception {
 
         if (report.getCategoryWiseTotals() == null || report.getCategoryWiseTotals().isEmpty())
@@ -195,9 +186,7 @@ public class PdfReportUtil {
         doc.add(Chunk.NEWLINE);
     }
 
-    // ──────────────────────────────────────────────
-    // Section 5: Type + Category Breakdown
-    // ──────────────────────────────────────────────
+    
     private void addTypeAndCategoryBreakdown(Document doc, ReportResponse report) throws Exception {
 
         if (report.getTypeAndCategoryBreakdown() == null) return;
@@ -231,9 +220,7 @@ public class PdfReportUtil {
         doc.add(Chunk.NEWLINE);
     }
 
-    // ──────────────────────────────────────────────
-    // Section 6: Monthly Trends
-    // ──────────────────────────────────────────────
+   
     private void addMonthlyTrends(Document doc, ReportResponse report) throws Exception {
 
         if (report.getMonthlyTrends() == null || report.getMonthlyTrends().isEmpty()) return;
@@ -259,9 +246,7 @@ public class PdfReportUtil {
         doc.add(Chunk.NEWLINE);
     }
 
-    // ──────────────────────────────────────────────
-    // Section 7: Per User Summary
-    // ──────────────────────────────────────────────
+    
     private void addPerUserSummary(Document doc, ReportResponse report) throws Exception {
 
         doc.add(createSectionHeader("Per User Summary"));
@@ -290,9 +275,7 @@ public class PdfReportUtil {
         doc.add(Chunk.NEWLINE);
     }
 
-    // ──────────────────────────────────────────────
-    // Section 8: All Records Table
-    // ──────────────────────────────────────────────
+
     private void addRecordsTable(Document doc, ReportResponse report) throws Exception {
 
         if (report.getRecords() == null || report.getRecords().isEmpty()) return;
@@ -321,9 +304,7 @@ public class PdfReportUtil {
         doc.add(table);
     }
 
-    // ──────────────────────────────────────────────
-    // Helper methods
-    // ──────────────────────────────────────────────
+   
 
     private Paragraph createSectionHeader(String title) {
         PdfPTable sectionTable = new PdfPTable(1);
